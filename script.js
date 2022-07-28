@@ -7,6 +7,7 @@ let currentSize = defaultSIZE
 let currentMode = defaultMODE
 
 function setCurrentMode(newMode) {  
+    activateButton(newMode)
     currentMode = newMode
 }
 
@@ -19,8 +20,6 @@ function setCurrentSize(newSize) {
 }
 
 
-
-
 const grid = document.getElementById("grid") //grab the place where you put the grid
 const sizeValue = document.getElementById("sizeValue") //grab the value size of grid
 const sizeSlider = document.getElementById("sizeSlider")//grabs slider
@@ -29,7 +28,7 @@ const eraserBtn = document.getElementById("eraserBtn")
 const rainbowBtn = document.getElementById("rainbowBtn")
 const clearBtn = document.getElementById("clearBtn")
 
-blackBtn.onclick = () => setCurrentMode("black")
+blackBtn.onclick = () => setCurrentMode("black") //make buttons and slider do things
 eraserBtn.onclick = () => setCurrentMode("eraser")
 rainbowBtn.onclick = () => setCurrentMode("rainbow")
 clearBtn.onclick = () => reloadGrid()
@@ -37,37 +36,33 @@ sizeSlider.onmousemove = (e) => updateSizeValue(e.target.value) //connects slide
 sizeSlider.onchange = (e) => changeSize(e.target.value)
 
 
-//make the function that sets the grid up to whatever size
-function setupGrid(size) {
+function setupGrid(size) { //make the function that sets the grid up to whatever size
 grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`
 grid.style.gridTemplateRows = `repeat(${size}, 1fr)`
-
 for (i=0; i<size*size; i++) {
     let square = document.createElement("div");
     square.classList.add("pixel-normal")
     square.addEventListener("mouseover", changeColor)
-    square.addEventListener("mousedown", changeColor)   //YOU ARE HERE
+    square.addEventListener("mousedown", changeColor)   
     grid.appendChild(square)
 }
 }
 
-//function that updates slider value
-function updateSizeValue(value) {
+
+function updateSizeValue(value) { //function that updates slider value
     sizeValue.innerHTML = `${value} x ${value}`
 }
 
 
-//function that changes size of grid according to slider
-function changeSize(value) {
+function changeSize(value) { //function that changes size of grid according to slider
     setCurrentSize(value)
     updateSizeValue(value)
     reloadGrid()
 }
 
 
-//function that changes the color
-function changeColor(e) {
-    if (click) {
+function changeColor(e) { //function that changes the color
+    if (e.type === 'mouseover' && !mouseDown) return;
     if (currentMode === "rainbow") {
         const randomR = Math.floor(Math.random() * 256)
         const randomG = Math.floor(Math.random() * 256)
@@ -81,22 +76,36 @@ function changeColor(e) {
         e.target.style.backgroundColor = '#fefefe'
     }
 }
-}
 
 
-//Stops the mouse from drawing all the time
-let click = true
-document.querySelector("body").addEventListener("click", (e) => {
-    if (e.target.tagName != "BUTTON") {
-      click = !click;}})
+let mouseDown = false //Stops the mouse from drawing all the time
+window.onmousedown = () => (mouseDown = true)
+window.onmouseup = () => (mouseDown = false)
 
+
+function activateButton(newMode) { //activate buttons if chosen
+    if (currentMode === 'rainbow') {
+      rainbowBtn.classList.remove('active')
+    } else if (currentMode === 'black') {
+      blackBtn.classList.remove('active')
+    } else if (currentMode === 'eraser') {
+      eraserBtn.classList.remove('active')
+    }
+  
+    if (newMode === 'rainbow') {
+      rainbowBtn.classList.add('active')
+    } else if (newMode === 'black') {
+      blackBtn.classList.add('active')
+    } else if (newMode === 'eraser') {
+      eraserBtn.classList.add('active')
+    }
+  }
 
     
-
-//functions to clear and reload grid
-function clearGrid() {
+function clearGrid() { //functions to clear and reload grid
     grid.innerHTML = ""
 }
+
 
 function reloadGrid() {
     clearGrid()
@@ -106,4 +115,5 @@ function reloadGrid() {
 
 window.onload = () => {
     setupGrid(defaultSIZE)
+    activateButton(defaultMODE)
   }
